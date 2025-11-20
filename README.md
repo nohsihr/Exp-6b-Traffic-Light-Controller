@@ -4,7 +4,6 @@ To design and simulate a Verilog HDL for Traffic Light Controler
 
 # Apparatus Required
 Vivado 2023.1
-Spartan 7 FPGA
 # Procedure
 1. Launch Vivado 2023.1
 Open Vivado 2023.1 and create a new project.
@@ -16,17 +15,69 @@ Type the Verilog code for the Traffic Light Controler
 3. Observe the Output
 Observe the Traffic Signal output.
 
-# code
+# Code
+```verilog
+module traffic_SH(
+input clk,rst,
+output reg[2:0]light
+    );
+parameter[1:0]RED=2'b00,GREEN=2'b01,YELLOW=2'b10;  
+reg[1:0]state,next_state;
+reg[3:0]count;
+always@(posedge clk or posedge rst)
+begin
+if(rst)begin
+state<=RED;
+count<=0;
+end
+else begin
+state<=next_state;
+count<=count+1;
+end
+end
+always@ (*)begin
+next_state=state;
+case(state)
+RED:if (count==4)next_state=GREEN;
+GREEN:if (count==6)next_state=YELLOW;
+YELLOW:if (count==2)next_state=RED;
+endcase
+end
+always@(*)begin
+case(state)
+RED:light=3'b001;
+GREEN:light=3'b010;
+YELLOW:light=3'b100;
+default:light=3'b000;
+endcase
+end
+endmodule
+```
 
+# Test Bench
+```Verilog
+module traffic_SH_tb; 
+reg clk,rst;
+wire[2:0]light;
+traffic_SH uut(clk,rst,light);
+initial clk=0;always#5 clk=~clk;
+initial begin
+rst=1;#10;rst=0;
+#200$finish;
+end
+initial begin
+$monitor("Time=%0t|Lights={Red,Yellow,Green}=%b",$time,light);
+end 
+endmodule
+```
+# Output
+<img width="1920" height="1200" alt="image" src="https://github.com/user-attachments/assets/043e17d4-fc16-4caa-ab47-632a2718983e" />
 
-# Tes Bench
-
-
-# output
 
 
 # Result
 
+The output for the traffic light are verified
 
 
 
